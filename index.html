@@ -1,42 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Estimasi Biaya Kegiatan</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 8px; max-width: 400px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimasi Biaya - Mini Project 055</title>
+    <!-- Memakai Tailwind CSS agar modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="card">
-        <h2>Estimasi Konsumsi</h2>
-        <input type="number" id="jumlah" placeholder="Jumlah Peserta">
-        <select id="jenis">
-            <option value="snack">Snack (15rb)</option>
-            <option value="makan">Makan (30rb)</option>
-            <option value="lengkap">Lengkap (45rb)</option>
-        </select>
-        <button onclick="hitung()">Hitung</button>
-        <div id="hasil"></div>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+        <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Estimasi Konsumsi 🍛</h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Jumlah Peserta</label>
+                <input type="number" id="jumlah" placeholder="Contoh: 50" 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Jenis Konsumsi</label>
+                <select id="jenis" 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all bg-white">
+                    <option value="snack">Snack (Rp15.000)</option>
+                    <option value="makan">Makan (Rp30.000)</option>
+                    <option value="lengkap">Lengkap (Rp45.000)</option>
+                </select>
+            </div>
+
+            <button onclick="hitung()" id="btnHitung"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95">
+                Hitung Sekarang
+            </button>
+        </div>
+
+        <!-- Area Hasil -->
+        <div id="loading" class="hidden mt-6 text-center text-blue-600 font-medium animate-pulse">Menghitung...</div>
+        
+        <div id="hasilBox" class="hidden mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+            <p class="text-slate-600 text-sm">Total Estimasi:</p>
+            <h3 id="totalBiaya" class="text-3xl font-extrabold text-blue-700">Rp0</h3>
+            <p id="infoWaktu" class="text-[10px] text-slate-400 mt-2 uppercase tracking-wider"></p>
+        </div>
+
+        <div id="errorBox" class="hidden mt-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
+            Gagal mengambil data. Pastikan API & CORS aktif.
+        </div>
+
+        <!-- Identitas -->
+        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+            <p class="text-slate-700 font-semibold">Nur Widyastuti</p>
+            <p class="text-slate-500 text-xs">NIM: 092024055</p>
+            <p class="text-blue-500 text-[10px] mt-1 font-medium">Azure Static Web Apps & Functions</p>
+        </div>
     </div>
-  <div style="margin-bottom: 20px;">
-      <p>Nama: Nur Widyastuti</p>
-      <p>NIM: 092024055</p>
-      <p>Layanan Azure Static Web Apps & Azure Functions</p>
-  </div>
 
     <script>
         async function hitung() {
             const jml = document.getElementById('jumlah').value;
             const jns = document.getElementById('jenis').value;
-            // GANTI URL DI BAWAH INI DENGAN URL FUNCTION ANDA
+            const btn = document.getElementById('btnHitung');
+            const loading = document.getElementById('loading');
+            const hasilBox = document.getElementById('hasilBox');
+            const errorBox = document.getElementById('errorBox');
+
+            if(!jml || jml <= 0) {
+                alert("Masukkan jumlah peserta yang valid!");
+                return;
+            }
+
+            // GANTI URL INI jika Function App Anda punya URL berbeda
             const url = `https://func-serverless-055.azurewebsites.net/api/EstimasiBiaya?jumlah=${jml}&jenis=${jns}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            document.getElementById('hasil').innerHTML = `
-                <p>Total Biaya: <b>Rp${data.total}</b></p>
-                <small>Waktu: ${data.timestamp}</small>
-            `;
+            
+            // UI State
+            loading.classList.remove('hidden');
+            hasilBox.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                
+                // Tampilkan Hasil
+                document.getElementById('totalBiaya').innerText = `Rp${data.total.toLocaleString('id-ID')}`;
+                document.getElementById('infoWaktu').innerText = `Timestamp: ${data.timestamp}`;
+                
+                hasilBox.classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                errorBox.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
