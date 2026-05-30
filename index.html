@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Estimasi Biaya Kegiatan</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 8px; max-width: 400px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Estimasi Konsumsi</h2>
+        <input type="number" id="jumlah" placeholder="Jumlah Peserta">
+        <select id="jenis">
+            <option value="snack">Snack (15rb)</option>
+            <option value="makan">Makan (30rb)</option>
+            <option value="lengkap">Lengkap (45rb)</option>
+        </select>
+        <button onclick="hitung()">Hitung</button>
+        <div id="hasil"></div>
+    </div>
+  <div style="margin-bottom: 20px;">
+      <p>Nama: Nur Widyastuti</p>
+      <p>NIM: 092024055</p>
+      <p>Layanan Azure Static Web Apps & Azure Functions</p>
+  </div>
+
+    <script>
+        async function hitung() {
+            const jml = document.getElementById('jumlah').value;
+            const jns = document.getElementById('jenis').value;
+            // GANTI URL DI BAWAH INI DENGAN URL FUNCTION ANDA
+            const url = `https://func-serverless-055.azurewebsites.net/api/EstimasiBiaya?jumlah=${jml}&jenis=${jns}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            document.getElementById('hasil').innerHTML = `
+                <p>Total Biaya: <b>Rp${data.total}</b></p>
+                <small>Waktu: ${data.timestamp}</small>
+            `;
+        }
+    </script>
+</body>
+</html>
